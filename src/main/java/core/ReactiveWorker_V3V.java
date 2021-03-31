@@ -3,10 +3,12 @@ package core;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-/** Worker that must defines two task (method) that run at the same time,
- * and whose results of the first feed the second. The second task return the result
- * to launch method that return to caller.
- * @param <T> : is the type of exchanged data between first task and second task */
+/** Worker with three task.
+ * The results of the last task are returned by laucher() method return.
+ * The initial data consumed by first task has to be given by constructor call.
+ * @param <T> : is the type of data exchanged between first task and second task.
+ * @param <U> : is the type of data exchanged between second task and third task.
+ * @param <V> : is the type returned by the last task through launch() method. */
 public abstract class ReactiveWorker_V3V<T,U,V> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
@@ -17,7 +19,7 @@ public abstract class ReactiveWorker_V3V<T,U,V> implements Runnable {
     private boolean thirdHasFinished  = false;  // true when the second task has finished
     private V computedResult = null;
 
-    /** Starts the first and second task in their own thread */
+    /** Starts each task in its own thread, and return the result of third task. This launcher() method is  */
     public final V launch(){
         internalFifo1 = new ArrayBlockingQueue<T>(10000);
         internalFifo2 = new ArrayBlockingQueue<U>(10000);
@@ -30,7 +32,7 @@ public abstract class ReactiveWorker_V3V<T,U,V> implements Runnable {
         t3.start();
         while( thirdHasFinished == false){
             try {
-                Thread.sleep(1);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -39,7 +41,7 @@ public abstract class ReactiveWorker_V3V<T,U,V> implements Runnable {
         return computedResult;
     }
 
-    /** Launch tasks and indicates when each is completed */
+    /** Call the task dedicated to this thread and indicates when its complete */
     @Override
     public final void run() {
         int numberTaskToLaunch = 0;
@@ -66,36 +68,38 @@ public abstract class ReactiveWorker_V3V<T,U,V> implements Runnable {
         }
     }
 
-    /** First task to execute. This first task has to send its results to the second task using send() method.*/
+    /** First task to execute. This first task has to send its results to the second task using toSecondTask() method.*/
     abstract void firstTask();
-    /** Second task to execute. This second task has take results of first task using next() method, and used them */
+    /** Second task to execute. This second task has to take results of first task using fromFirstTask() method, and used them.
+     * Then return its own results to the third task using toThirdTask() method. */
     abstract void secondTask();
-    /** Second task to execute. This second task has take results of first task using next() method, and used them */
+    /** Third task to execute. This third task has to take results of second task using fromSecondTask() method, and used them.
+     * Then return its own results to the caller, using answer() method. */
     abstract void thirdTask();
 
-    /** send the specified element to the secondTask.
-     * Some exceptions can be throwed, if element is null, if element contains some attributs that prevent it
-     * to be putted into the queue, etc... */
-    protected void toSecondTask(T element) throws InterruptedException {
+    /** Send the specified element to the secondTask.
+     * Some exceptions can be thrown, if element is null, if element contains some attributs that prevent it
+     * to be put into the queue, etc... */
+    protected final void toSecondTask(T element) throws InterruptedException {
         internalFifo1.put(element);
     }
-    /** send the specified element to the secondTask.
-     * Some exceptions can be throwed, if element is null, if element contains some attributs that prevent it
-     * to be putted into the queue, etc... */
+    /** Send the specified element to the thirdTask.
+     * Some exceptions can be thrown, if element is null, if element contains some attributs that prevent it
+     * to be put into the queue, etc... */
     protected void toThirdTask(U element) throws InterruptedException {
         internalFifo2.put(element);
     }
 
-    /** @return The next element from the fifo. If fifo is empty and producer is dead, then null is returned */
-    protected T fromFirstTask(){
+    /** @return The next element sended by first task. If fifo is empty and producer is dead, then null is returned */
+    protected final T fromFirstTask(){
         while(true) {
             T element = internalFifo1.poll();
             if (null != element) return element;
             if (firstHasFinished) return null;
         }
     }
-    /** @return The next element from the fifo. If fifo is empty and producer is dead, then null is returned */
-    protected U fromSecondTask(){
+    /** @return The next element sended by second task. If fifo is empty and producer is dead, then null is returned */
+    protected final U fromSecondTask(){
         while(true) {
             U element = internalFifo2.poll();
             if (null != element) return element;
@@ -103,8 +107,8 @@ public abstract class ReactiveWorker_V3V<T,U,V> implements Runnable {
         }
     }
 
-    /** return the given result to the caller of this object */
-   protected void returnResult(V result){
+    /** return the given result to the caller of this object. This method has to be called by the last task */
+   protected final void returnResult(V result){
         computedResult = result;
    }
 }
