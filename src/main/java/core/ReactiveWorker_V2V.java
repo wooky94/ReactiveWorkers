@@ -8,14 +8,15 @@ import java.util.concurrent.BlockingQueue;
  * This fifo can be read by launcher (caller) using next() method.
  * The initial data consumed by first task has to be given by constructor call.
  * @param <T> : is the type of data exchanged between first task and second task.
- * @param <U> : is the type returned by the task into the fifo */
-public abstract class ReactiveWorker_V2F<T,U> implements Runnable {
+ * @param <U> : is the type returned by the last task through launch() method. */
+public abstract class ReactiveWorker_V2V<T,U> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
     private BlockingQueue<T> internalFifo;      // The internal fifo between first task  and second task
     private BlockingQueue<U> outPutFifo;        // The output fifo into the second task write, and caller read
     private boolean firstHasFinished  = false;  // true when the first task has finished
     private boolean secondHasFinished = false;  // true when the second task has finished
+    private U computedResult = null;
 
     /** Starts each task in its own thread */
     public final void launch(){
@@ -26,6 +27,13 @@ public abstract class ReactiveWorker_V2F<T,U> implements Runnable {
         t1.start();
         Thread t2 = new Thread(this);
         t2.start();
+        while( secondHasFinished == false){
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /** Call the task dedicated to this thread and indicates when its complete */
@@ -74,27 +82,9 @@ public abstract class ReactiveWorker_V2F<T,U> implements Runnable {
         }
     }
 
-    /** send the specified element through main fifo (to the launcher).
-     * Some exceptions can be throwed, if element is null, if element contains some attributs that prevent it
-     * to be putted into the queue, etc...<br>
-     *
-     * @throws InterruptedException - if interrupted while waiting
-     * @throws ClassCastException - if the class of the specified element prevents it from being added to this queue
-     * @throws NullPointerException - if the specified element is null
-     * @throws IllegalArgumentException - if some property of the specified element prevents it from being added to this queue
-     */
-    protected void answer(U element) throws InterruptedException {
-        outPutFifo.put(element);
-    }
-
-    /** This method has to be used by the launcher.
-     * @return The next element from the fifo filled by the task */
-    public U next(){
-        while(true) {
-            U element = outPutFifo.poll();
-            if (null != element) return element;
-            if (secondHasFinished) return null;
-        }
+    /** return the given result to the caller of this object. This method has to be called by the last task */
+    protected final void returnResult(U result){
+        computedResult = result;
     }
 
 }
