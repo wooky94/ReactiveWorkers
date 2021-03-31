@@ -2,10 +2,7 @@ package core;
 
 import lombok.extern.slf4j.XSlf4j;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class QuickyCounter extends DoubleWorker<Integer,Integer> {
+public class QuickyCounter extends ReactiveWorker_V2F<Integer,Integer> {
 
     int numberOfCycle = 0;
 

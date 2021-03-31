@@ -2,6 +2,16 @@
 <project version="4">
   <component name="RemoteRepositoriesConfiguration">
     <remote-repository>
+      <option name="id" value="chronopost-internal-snapshots" />
+      <option name="name" value="chronopost-internal-snapshots" />
+      <option name="url" value="http://lyn4e101.tlt:57951/nexus/content/repositories/snapshots/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central" />
+      <option name="name" value="Central Repository" />
+      <option name="url" value="http://lyn4e101.tlt:57951/nexus/content/groups/public/" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="central" />
       <option name="name" value="Central Repository" />
       <option name="url" value="https://repo.maven.apache.org/maven2" />
@@ -15,6 +25,11 @@
       <option name="id" value="jboss.community" />
       <option name="name" value="JBoss Community repository" />
       <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="chronopost-internal" />
+      <option name="name" value="chronopost-internal" />
+      <option name="url" value="http://lyn4e101.tlt:57951/nexus/content/repositories/releases/" />
     </remote-repository>
   </component>
 </project>
