@@ -7,7 +7,7 @@ import java.util.concurrent.BlockingQueue;
  * The results of this task are collected in a fifo.
  * This fifo can be read by launcher (caller) using next() method
  * @param <U> : is the type sended by task */
-public abstract class SimpleWorker<U> implements Runnable {
+public abstract class ReactiveWorker_V1F<U> implements Runnable {
 
     private BlockingQueue<U> outPutFifo;    // The output fifo.
     private boolean taskFinished = false;   // True when the task is completed

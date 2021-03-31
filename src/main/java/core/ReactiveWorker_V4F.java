@@ -13,21 +13,24 @@ import java.util.concurrent.BlockingQueue;
  * @param <T> : is the type exchanged between first and second task
  * @param <U> : is the type exchanged between second and third task
  * @param <V> : is the type returned to the caller by second task */
-public abstract class TripleWorker<T,U,V> implements Runnable {
+public abstract class ReactiveWorker_V4F<T,U,V,W> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
     private BlockingQueue<T> internalFifo1;     // The internal fifo between first task  and second task
     private BlockingQueue<U> internalFifo2;     // The internal fifo between second task and third task
-    private BlockingQueue<V> outPutFifo;        // The output fifo into the second task write, and caller read
+    private BlockingQueue<V> internalFifo3;     // The internal fifo between third task and fourth task
+    private BlockingQueue<W> outPutFifo;        // The output fifo into the second task write, and caller read
     private boolean firstHasFinished  = false;  // true when the first task has finished
     private boolean secondHasFinished = false;  // true when the second task has finished
-    private boolean thirdHasFinished  = false;  // true when the second task has finished
+    private boolean thirdHasFinished  = false;  // true when the third task has finished
+    private boolean fourthHasFinished = false;  // true when the fourth task has finished;
 
     /** Starts the first, second and third task in their own thread */
     public final void launch(){
         internalFifo1 = new ArrayBlockingQueue<T>(10000);
         internalFifo2 = new ArrayBlockingQueue<U>(10000);
-        outPutFifo = new ArrayBlockingQueue<V>(10000);
+        internalFifo3 = new ArrayBlockingQueue<V>(10000);
+        outPutFifo = new ArrayBlockingQueue<W>(10000);
 
         Thread t1 = new Thread(this);
         t1.start();
@@ -35,6 +38,8 @@ public abstract class TripleWorker<T,U,V> implements Runnable {
         t2.start();
         Thread t3 = new Thread(this);
         t3.start();
+        Thread t4 = new Thread(this);
+        t4.start();
     }
 
     @Override
@@ -58,6 +63,10 @@ public abstract class TripleWorker<T,U,V> implements Runnable {
                 thirdTask();
                 thirdHasFinished = true;
                 break;
+            case 4:
+                fourthTask();
+                fourthHasFinished = true;
+                break;
             default:
                 throw new IllegalStateException("Unexpected value: " + numberTaskToLaunch);
         }
@@ -69,6 +78,8 @@ public abstract class TripleWorker<T,U,V> implements Runnable {
     abstract void secondTask();
     /** Third task to execute. This third task has take results of second task using next() method, and used them */
     abstract void thirdTask();
+    /** Fourth task to execute. This fourth task has take results of third task using fromThirdTask() method, and used them */
+    abstract void fourthTask();
 
     /** send the specified element to the secondTask.
      * Some exceptions can be throwed, if element is null, if element contains some attributs that prevent it
@@ -81,6 +92,13 @@ public abstract class TripleWorker<T,U,V> implements Runnable {
      * to be putted into the queue, etc... */
     protected void toThirdTask(U element) throws InterruptedException {
         internalFifo2.put(element);
+    }
+
+    /** send the specified element to the fourthTask.
+     * Some exceptions can be throwed, if element is null, if element contains some attributs that prevent it
+     * to be putted into the queue, etc... */
+    protected void toFourthTask(V element) throws InterruptedException {
+        internalFifo3.put(element);
     }
 
     /** @return The next element from the fifo. If fifo is empty and producer is dead, then null is returned */
@@ -101,18 +119,27 @@ public abstract class TripleWorker<T,U,V> implements Runnable {
         }
     }
 
+    /** @return The next element from the fifo. If fifo is empty and producer is dead, then null is returned */
+    protected V fromThirdTask(){
+        while(true) {
+            V element = internalFifo3.poll();
+            if (null != element) return element;
+            if (secondHasFinished) return null;
+        }
+    }
+
     /** send the specified element through main fifo (to the launcher of this object).
      * Some exceptions can be throwed, if element is null, if element contains some attributs that prevent it
      * to be putted into the queue, etc... */
-    protected void answer(V element) throws InterruptedException {
+    protected void answer(W element) throws InterruptedException {
         outPutFifo.put(element);
     }
 
     /** This method has to be used by the caller (which has called launch() methode).
      * @return The next element from the fifo filled by the second task */
-    public V next(){
+    public W next(){
         while(true) {
-            V element = outPutFifo.poll();
+            W element = outPutFifo.poll();
             if (null != element) return element;
             if (thirdHasFinished) return null;
         }

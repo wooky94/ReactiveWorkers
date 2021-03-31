@@ -9,7 +9,7 @@ import java.util.concurrent.BlockingQueue;
  * First and Second task work in same time, and results of first task are sended to second task through
  * an internal fifo.
  * @param <U> : is the type returned to the caller by second task */
-public abstract class DoubleWorker<T,U> implements Runnable {
+public abstract class ReactiveWorker_V2F<T,U> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
     private BlockingQueue<T> internalFifo;      // The internal fifo between first task  and second task
