@@ -1,6 +1,5 @@
 package core;
 
-import lombok.extern.slf4j.XSlf4j;
 
 public class QuickyCounter extends ReactiveWorker_V2F<Integer,Integer> {
 
