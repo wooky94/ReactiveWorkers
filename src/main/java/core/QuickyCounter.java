@@ -1,7 +1,7 @@
 package core;
 
 
-public class QuickyCounter extends ReactiveWorker_V2F<Integer,Integer> {
+public class QuickyCounter extends ReactiveWorker_V4F<Integer,Integer,Integer,Integer> {
 
     int numberOfCycle = 0;
 
@@ -32,6 +32,36 @@ public class QuickyCounter extends ReactiveWorker_V2F<Integer,Integer> {
         Integer result = 0;
         while(true) {
             Integer val = fromFirstTask();
+            if (val == null) return;
+            result += val;
+            try {
+                toThirdTask(result);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    void thirdTask() {
+        Integer result = 0;
+        while(true) {
+            Integer val = fromSecondTask();
+            if (val == null) return;
+            result += val;
+            try {
+                toFourthTask(result);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    void fourthTask() {
+        Integer result = 0;
+        while(true) {
+            Integer val = fromThirdTask();
             if (val == null) return;
             result += val;
             try {
