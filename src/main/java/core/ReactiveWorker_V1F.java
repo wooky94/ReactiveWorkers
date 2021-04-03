@@ -6,6 +6,7 @@ import java.util.concurrent.BlockingQueue;
 /** Worker with a single task.
  * The results of this task are returned through a fifo.
  * This fifo can be read by launcher (caller) using next() method
+ * The initial data consumed by single task has to be given by constructor call.
  * @param <U> : is the type returned by the task into the fifo */
 public abstract class ReactiveWorker_V1F<U> implements Runnable {
 
