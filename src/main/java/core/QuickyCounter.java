@@ -1,7 +1,7 @@
 package core;
 
 
-public class QuickyCounter extends Worker_F1F<Integer,String> {
+public class QuickyCounter extends ReactiveWorker_F1F<Integer,String> {
 
 
     /** Task to execute.<br>
