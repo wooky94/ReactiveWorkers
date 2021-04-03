@@ -11,7 +11,7 @@ import java.util.concurrent.BlockingQueue;
  * @param <U> : is the type of data exchanged between second task and third task.
  * @param <V> : is the type of data exchanged between third task and fourth task.
  * @param <W> : is the type returned by the task into the fifo */
-public abstract class ReactiveWorker_V4F<T,U,V,W> extends FifoWriter<W> implements Runnable {
+public abstract class ReactiveWorker_F4F<T,U,V,W,X> extends FifoReaderWriter<T,X> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
     private BlockingQueue<T> internalFifo1;     // The internal fifo between first task  and second task

@@ -13,7 +13,6 @@ public abstract class ReactiveWorker_V2V<T,U> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
     private BlockingQueue<T> internalFifo;      // The internal fifo between first task  and second task
-    private BlockingQueue<U> outPutFifo;        // The output fifo into the second task write, and caller read
     private boolean firstHasFinished  = false;  // true when the first task has finished
     private boolean secondHasFinished = false;  // true when the second task has finished
     private U computedResult = null;
@@ -21,7 +20,6 @@ public abstract class ReactiveWorker_V2V<T,U> implements Runnable {
     /** Starts each task in its own thread */
     public final void launch(){
         internalFifo = new ArrayBlockingQueue<T>(10000);
-        outPutFifo = new ArrayBlockingQueue<U>(10000);
 
         Thread t1 = new Thread(this);
         t1.start();

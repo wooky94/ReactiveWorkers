@@ -7,7 +7,7 @@ package core;
  * WARNING: launcher must declared  the end of feeding by calling noMoreInput() method
  * @param <U> : is the type of object that are put into the input fifo
  * @param <V> : is the type returned by the task into the fifo */
-public abstract class Worker_F1F<U,V> extends FeedableStreamer<U,V> implements Runnable {
+public abstract class Worker_F1F<U,V> extends FifoReaderWriter<U,V> implements Runnable {
 
     public Worker_F1F() {
         super();

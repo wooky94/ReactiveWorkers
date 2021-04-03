@@ -9,15 +9,16 @@ import java.util.concurrent.BlockingQueue;
  * The initial data consumed by first task has to be given by constructor call.
  * @param <T> : is the type of data exchanged between first task and second task.
  * @param <U> : is the type returned by the task into the fifo */
-public abstract class ReactiveWorker_V2F<T,U> extends FifoWriter<U> implements Runnable {
+public abstract class ReactiveWorker_F2F<T,U,V> extends FifoReaderWriter<T,V> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
-    private BlockingQueue<T> internalFifo;      // The internal fifo between first task  and second task
+    private BlockingQueue<U> internalFifo;      // The internal fifo between first task  and second task
     private boolean firstHasFinished  = false;  // true when the first task has finished
 
     /** Starts each task in its own thread */
     public final void launch(){
-        internalFifo = new ArrayBlockingQueue<T>(10000);
+        internalFifo = new ArrayBlockingQueue<U>(10000);
+
         Thread t1 = new Thread(this);
         t1.start();
         Thread t2 = new Thread(this);
@@ -57,14 +58,14 @@ public abstract class ReactiveWorker_V2F<T,U> extends FifoWriter<U> implements R
     /** Send the specified element to the secondTask.
      * Some exceptions can be thrown, if element is null, if element contains some attributs that prevent it
      * to be put into the queue, etc... */
-    protected void toSecondTask(T element) throws InterruptedException {
+    protected void toSecondTask(U element) throws InterruptedException {
         internalFifo.put(element);
     }
 
     /** @return The next element sended by first task. If fifo is empty and producer is dead, then null is returned */
-    protected T fromFirstTask(){
+    protected U fromFirstTask(){
         while(true) {
-            T element = internalFifo.poll();
+            U element = internalFifo.poll();
             if (null != element) return element;
             if (firstHasFinished) return null;
         }

@@ -9,11 +9,11 @@ import java.util.concurrent.BlockingQueue;
  * A fromLauncher() method to allow task to get input data from the inputFifo.
  * @param <U> : is the type of object that are put into the input fifo
  */
-public abstract class Feedable<U> {
+public abstract class FiFoReader<U> {
     private BlockingQueue<U> inPutFifo;     // The input fifo.
     private boolean noMoreInput = false;    // True when the launcher declare it
 
-    public Feedable() {
+    public FiFoReader() {
         inPutFifo = new ArrayBlockingQueue<U>(10000);
     }
 

@@ -12,11 +12,11 @@ import java.util.concurrent.BlockingQueue;
  * A next() method to allow the launcher to get response from the outputFifo.
  * @param <U> : is the type of object that are put into the input fifo
  * @param <V> : is the type returned by the task into the fifo */
-public abstract class FeedableStreamer<U,V> extends Feedable<U> {
+public abstract class FifoReaderWriter<U,V> extends FiFoReader<U> {
     private BlockingQueue<V> outPutFifo;    // The output fifo.
-    private boolean taskFinished = false;   // True when the task is completed
+    private boolean lastTaskIsFinished = false;   // True when the task is completed
 
-    public FeedableStreamer() {
+    public FifoReaderWriter() {
         super();
         outPutFifo = new ArrayBlockingQueue<V>(10000);
     }
@@ -36,7 +36,7 @@ public abstract class FeedableStreamer<U,V> extends Feedable<U> {
 
     /** declare that last task is finished. This means that if the fifo is empty, then no more data should be expected. */
     protected void lastTaskIsFinished() {
-        taskFinished = true;
+        lastTaskIsFinished = true;
     }
 
 
@@ -46,7 +46,7 @@ public abstract class FeedableStreamer<U,V> extends Feedable<U> {
         while(true) {
             V element = outPutFifo.poll();
             if (null != element) return element;
-            if (taskFinished) return null;
+            if (lastTaskIsFinished) return null;
         }
     }
 }

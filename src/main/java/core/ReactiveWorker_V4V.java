@@ -17,7 +17,6 @@ public abstract class ReactiveWorker_V4V<T,U,V,W> implements Runnable {
     private BlockingQueue<T> internalFifo1;     // The internal fifo between first task  and second task
     private BlockingQueue<U> internalFifo2;     // The internal fifo between second task and third task
     private BlockingQueue<V> internalFifo3;     // The internal fifo between third task and fourth task
-    private BlockingQueue<W> outPutFifo;        // The output fifo into the second task write, and caller read
     private boolean firstHasFinished  = false;  // true when the first task has finished
     private boolean secondHasFinished = false;  // true when the second task has finished
     private boolean thirdHasFinished  = false;  // true when the third task has finished
@@ -29,7 +28,6 @@ public abstract class ReactiveWorker_V4V<T,U,V,W> implements Runnable {
         internalFifo1 = new ArrayBlockingQueue<T>(10000);
         internalFifo2 = new ArrayBlockingQueue<U>(10000);
         internalFifo3 = new ArrayBlockingQueue<V>(10000);
-        outPutFifo = new ArrayBlockingQueue<W>(10000);
 
         Thread t1 = new Thread(this);
         t1.start();

@@ -10,21 +10,18 @@ import java.util.concurrent.BlockingQueue;
  * @param <T> : is the type of data exchanged between first task and second task.
  * @param <U> : is the type of data exchanged between second task and third task.
  * @param <V> : is the type returned by the task into the fifo */
-public abstract class ReactiveWorker_V3F<T,U,V> implements Runnable {
+public abstract class ReactiveWorker_V3F<T,U,V> extends FifoWriter<V> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
     private BlockingQueue<T> internalFifo1;     // The internal fifo between first task  and second task
     private BlockingQueue<U> internalFifo2;     // The internal fifo between second task and third task
-    private BlockingQueue<V> outPutFifo;        // The output fifo into the second task write, and caller read
     private boolean firstHasFinished  = false;  // true when the first task has finished
     private boolean secondHasFinished = false;  // true when the second task has finished
-    private boolean thirdHasFinished  = false;  // true when the second task has finished
 
     /** Starts each task in its own thread */
     public final void launch(){
         internalFifo1 = new ArrayBlockingQueue<T>(10000);
         internalFifo2 = new ArrayBlockingQueue<U>(10000);
-        outPutFifo = new ArrayBlockingQueue<V>(10000);
 
         Thread t1 = new Thread(this);
         t1.start();
@@ -54,7 +51,7 @@ public abstract class ReactiveWorker_V3F<T,U,V> implements Runnable {
                 break;
             case 3:
                 thirdTask();
-                thirdHasFinished = true;
+                lastTaskIsFinished();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + numberTaskToLaunch);
@@ -100,28 +97,4 @@ public abstract class ReactiveWorker_V3F<T,U,V> implements Runnable {
             if (secondHasFinished) return null;
         }
     }
-
-    /** send the specified element through main fifo (to the launcher).
-     * Some exceptions can be throwed, if element is null, if element contains some attributs that prevent it
-     * to be putted into the queue, etc...<br>
-     *
-     * @throws InterruptedException - if interrupted while waiting
-     * @throws ClassCastException - if the class of the specified element prevents it from being added to this queue
-     * @throws NullPointerException - if the specified element is null
-     * @throws IllegalArgumentException - if some property of the specified element prevents it from being added to this queue
-     */
-    protected void answer(V element) throws InterruptedException {
-        outPutFifo.put(element);
-    }
-
-    /** This method has to be used by the launcher.
-     * @return The next element from the fifo filled by the task */
-    public V next(){
-        while(true) {
-            V element = outPutFifo.poll();
-            if (null != element) return element;
-            if (thirdHasFinished) return null;
-        }
-    }
-
 }
