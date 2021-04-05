@@ -1,4 +1,4 @@
-package core;
+package core.structure;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;

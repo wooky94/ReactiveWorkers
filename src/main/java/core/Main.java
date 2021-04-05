@@ -5,13 +5,14 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         QuickyCounter compteur = new QuickyCounter();
-        compteur.launch();
-        for(int i = 0; i< 200; i++){
+
+        for(int i = 0; i< 20; i+=2)
             compteur.feed(Integer.valueOf(i));
 
-            System.out.println(compteur.next());
-        }
         compteur.noMoreInput();
+        List<Integer> result = compteur.launch();
+        System.out.println(result);
+
 
     }
 

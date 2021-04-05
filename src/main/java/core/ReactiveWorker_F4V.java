@@ -1,19 +1,19 @@
 package core;
 
-import core.structure.FifoWriter;
+import core.structure.FiFoReaderVariableSender;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /** Worker with four task.
- * The results of the last task are returned through a fifo.
- * This fifo can be read by launcher (caller) using next() method.
- * The initial data consumed by first task has to be given by constructor call.
+ * The results of the last task are returned through launch() return.
+ * The initial data consumed by single task are sended by launcher using feed() method, and read first task using
+ * fromLauncher() method.
  * @param <T> : is the type of data exchanged between first task and second task.
  * @param <U> : is the type of data exchanged between second task and third task.
  * @param <V> : is the type of data exchanged between third task and fourth task.
  * @param <W> : is the type returned by the task into the fifo */
-public abstract class ReactiveWorker_V4F<T,U,V,W> extends FifoWriter<W> implements Runnable {
+public abstract class ReactiveWorker_F4V<T,U,V,W,X> extends FiFoReaderVariableSender<T,X> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
     private BlockingQueue<T> internalFifo1;     // The internal fifo between first task  and second task
@@ -23,8 +23,9 @@ public abstract class ReactiveWorker_V4F<T,U,V,W> extends FifoWriter<W> implemen
     private boolean secondHasFinished = false;  // true when the second task has finished
     private boolean thirdHasFinished  = false;  // true when the third task has finished
 
-    /** Starts each task in its own thread */
-    public final void launch(){
+    /** Starts each task in its own thread
+     * @return*/
+    public final X launch(){
         internalFifo1 = new ArrayBlockingQueue<T>(10000);
         internalFifo2 = new ArrayBlockingQueue<U>(10000);
         internalFifo3 = new ArrayBlockingQueue<V>(10000);
@@ -37,6 +38,7 @@ public abstract class ReactiveWorker_V4F<T,U,V,W> extends FifoWriter<W> implemen
         t3.start();
         Thread t4 = new Thread(this);
         t4.start();
+        return answerWhenAvailable();
     }
 
     /** Call the task dedicated to this thread and indicates when its complete */
@@ -63,7 +65,7 @@ public abstract class ReactiveWorker_V4F<T,U,V,W> extends FifoWriter<W> implemen
                 break;
             case 4:
                 fourthTask();
-                lastTaskIsFinished();
+                declaresLastTaskIsFinished();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + numberTaskToLaunch);
@@ -126,7 +128,7 @@ public abstract class ReactiveWorker_V4F<T,U,V,W> extends FifoWriter<W> implemen
         while(true) {
             V element = internalFifo3.poll();
             if (null != element) return element;
-            if (thirdHasFinished) return null;
+            if (secondHasFinished) return null;
         }
     }
 }

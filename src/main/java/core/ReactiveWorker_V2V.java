@@ -4,8 +4,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /** Worker with a two task.
- * The results of the last task are returned through a fifo.
- * This fifo can be read by launcher (caller) using next() method.
+ * The results of the last task are returned through launch() return.
  * The initial data consumed by first task has to be given by constructor call.
  * @param <T> : is the type of data exchanged between first task and second task.
  * @param <U> : is the type returned by the last task through launch() method. */
@@ -18,7 +17,7 @@ public abstract class ReactiveWorker_V2V<T,U> implements Runnable {
     private U computedResult = null;
 
     /** Starts each task in its own thread */
-    public final void launch(){
+    public final U launch(){
         internalFifo = new ArrayBlockingQueue<T>(10000);
 
         Thread t1 = new Thread(this);
@@ -32,6 +31,7 @@ public abstract class ReactiveWorker_V2V<T,U> implements Runnable {
                 e.printStackTrace();
             }
         }
+        return computedResult;
     }
 
     /** Call the task dedicated to this thread and indicates when its complete */
@@ -81,7 +81,7 @@ public abstract class ReactiveWorker_V2V<T,U> implements Runnable {
     }
 
     /** return the given result to the caller of this object. This method has to be called by the last task */
-    protected final void returnResult(U result){
+    protected final void answer(U result){
         computedResult = result;
     }
 

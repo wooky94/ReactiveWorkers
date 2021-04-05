@@ -4,7 +4,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /** Worker with three task.
- * The results of the last task are returned by laucher() method return.
+ * The results of the last task are returned through launch() return.
  * The initial data consumed by first task has to be given by constructor call.
  * @param <T> : is the type of data exchanged between first task and second task.
  * @param <U> : is the type of data exchanged between second task and third task.
@@ -37,7 +37,6 @@ public abstract class ReactiveWorker_V3V<T,U,V> implements Runnable {
                 e.printStackTrace();
             }
         }
-
         return computedResult;
     }
 
@@ -108,7 +107,7 @@ public abstract class ReactiveWorker_V3V<T,U,V> implements Runnable {
     }
 
     /** return the given result to the caller of this object. This method has to be called by the last task */
-   protected final void returnResult(V result){
+   protected final void answer(V result){
         computedResult = result;
    }
 }

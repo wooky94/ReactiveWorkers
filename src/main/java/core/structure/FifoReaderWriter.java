@@ -1,4 +1,6 @@
-package core;
+package core.structure;
+
+import core.structure.FiFoReader;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -35,7 +37,7 @@ public abstract class FifoReaderWriter<U,V> extends FiFoReader<U> {
     }
 
     /** declare that last task is finished. This means that if the fifo is empty, then no more data should be expected. */
-    protected void lastTaskIsFinished() {
+    protected void declareLastTaskIsFinished() {
         lastTaskIsFinished = true;
     }
 

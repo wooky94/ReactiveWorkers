@@ -1,7 +1,6 @@
 package core;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import core.structure.FifoWriter;
 
 /** Worker with a single task.
  * The results of this task are returned through a fifo.

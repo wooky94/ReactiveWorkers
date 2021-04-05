@@ -1,12 +1,15 @@
 package core;
 
+import core.structure.FifoReaderWriter;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /** Worker with four task.
  * The results of the last task are returned through a fifo.
  * This fifo can be read by launcher (caller) using next() method.
- * The initial data consumed by first task has to be given by constructor call.
+ * The initial data consumed by single task are sended by launcher using feed() method, and read first task using
+ * fromLauncher() method.
  * @param <T> : is the type of data exchanged between first task and second task.
  * @param <U> : is the type of data exchanged between second task and third task.
  * @param <V> : is the type of data exchanged between third task and fourth task.
@@ -61,7 +64,7 @@ public abstract class ReactiveWorker_F4F<T,U,V,W,X> extends FifoReaderWriter<T,X
                 break;
             case 4:
                 fourthTask();
-                lastTaskIsFinished();
+                declareLastTaskIsFinished();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + numberTaskToLaunch);

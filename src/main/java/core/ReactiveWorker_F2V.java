@@ -1,31 +1,32 @@
 package core;
 
-import core.structure.FifoReaderWriter;
+import core.structure.FiFoReaderVariableSender;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /** Worker with a two task.
- * The results of the last task are returned through a fifo.
- * This fifo can be read by launcher (caller) using next() method.
+ * The results of the last task are returned through launch() return.
  * The initial data consumed by single task are sended by launcher using feed() method, and read first task using
  * fromLauncher() method.
  * @param <T> : is the type of data exchanged between first task and second task.
  * @param <U> : is the type returned by the task into the fifo */
-public abstract class ReactiveWorker_F2F<T,U,V> extends FifoReaderWriter<T,V> implements Runnable {
+public abstract class ReactiveWorker_F2V<T,U,V> extends FiFoReaderVariableSender<T,V> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
     private BlockingQueue<U> internalFifo;      // The internal fifo between first task  and second task
     private boolean firstHasFinished  = false;  // true when the first task has finished
 
-    /** Starts each task in its own thread */
-    public final void launch(){
+    /** Starts each task in its own thread
+     * @return*/
+    public final V launch(){
         internalFifo = new ArrayBlockingQueue<U>(10000);
 
         Thread t1 = new Thread(this);
         t1.start();
         Thread t2 = new Thread(this);
         t2.start();
+        return answerWhenAvailable();
     }
 
     /** Call the task dedicated to this thread and indicates when its complete */
@@ -44,7 +45,7 @@ public abstract class ReactiveWorker_F2F<T,U,V> extends FifoReaderWriter<T,V> im
                 break;
             case 2:
                 secondTask();
-                declareLastTaskIsFinished();
+                declaresLastTaskIsFinished();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + numberTaskToLaunch);
