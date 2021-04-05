@@ -23,8 +23,8 @@ public abstract class ReactiveWorker_F4V<T,U,V,W,X> extends FiFoReaderVariableSe
     private boolean secondHasFinished = false;  // true when the second task has finished
     private boolean thirdHasFinished  = false;  // true when the third task has finished
 
-    /** Starts each task in its own thread
-     * @return*/
+    /** Starts each task in its own thread.
+     * @return The answer of last task when it's finished */
     public final X launch(){
         internalFifo1 = new ArrayBlockingQueue<T>(10000);
         internalFifo2 = new ArrayBlockingQueue<U>(10000);
@@ -65,7 +65,7 @@ public abstract class ReactiveWorker_F4V<T,U,V,W,X> extends FiFoReaderVariableSe
                 break;
             case 4:
                 fourthTask();
-                declaresLastTaskIsFinished();
+                declareLastTaskIsFinished();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + numberTaskToLaunch);

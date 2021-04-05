@@ -20,7 +20,7 @@ public abstract class ReactiveWorker_F3V<T,U,V,W> extends FiFoReaderVariableSend
     private boolean firstHasFinished  = false;  // true when the first task has finished
     private boolean secondHasFinished = false;  // true when the second task has finished
 
-    /** Starts each task in its own thread
+    /** Starts each task in its own thread.
      * @return The answer of last task when it's finished */
     public final W launch(){
         internalFifo1 = new ArrayBlockingQueue<U>(10000);
@@ -55,7 +55,7 @@ public abstract class ReactiveWorker_F3V<T,U,V,W> extends FiFoReaderVariableSend
                 break;
             case 3:
                 thirdTask();
-                declaresLastTaskIsFinished();
+                declareLastTaskIsFinished();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + numberTaskToLaunch);

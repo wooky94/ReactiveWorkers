@@ -10,9 +10,10 @@ import java.util.concurrent.BlockingQueue;
  * This fifo can be read by launcher (caller) using next() method.
  * The initial data consumed by single task are sended by launcher using feed() method, and read first task using
  * fromLauncher() method.
- * @param <T> : is the type of data exchanged between first task and second task.
- * @param <U> : is the type of data exchanged between second task and third task.
- * @param <V> : is the type returned by the task into the fifo */
+ * @param <T> : is the type sent by launcher to the first task.
+ * @param <U> : is the type of data exchanged between first task and second task.
+ * @param <V> : is the type of data exchanged between second task and third task.
+ * @param <W> : is the type returned by the task into the fifo */
 public abstract class ReactiveWorker_F3F<T,U,V,W> extends FifoReaderWriter<T,W> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
@@ -21,7 +22,7 @@ public abstract class ReactiveWorker_F3F<T,U,V,W> extends FifoReaderWriter<T,W> 
     private boolean firstHasFinished  = false;  // true when the first task has finished
     private boolean secondHasFinished = false;  // true when the second task has finished
 
-    /** Starts each task in its own thread */
+    /** Starts each task in its own thread. Non blocking. */
     public final void launch(){
         internalFifo1 = new ArrayBlockingQueue<U>(10000);
         internalFifo2 = new ArrayBlockingQueue<V>(10000);

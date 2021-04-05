@@ -24,7 +24,7 @@ public abstract class ReactiveWorker_F4F<T,U,V,W,X> extends FifoReaderWriter<T,X
     private boolean secondHasFinished = false;  // true when the second task has finished
     private boolean thirdHasFinished  = false;  // true when the third task has finished
 
-    /** Starts each task in its own thread */
+    /** Starts each task in its own thread. Non blocking. */
     public final void launch(){
         internalFifo1 = new ArrayBlockingQueue<T>(10000);
         internalFifo2 = new ArrayBlockingQueue<U>(10000);

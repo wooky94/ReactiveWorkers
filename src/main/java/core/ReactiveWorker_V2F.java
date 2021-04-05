@@ -17,7 +17,7 @@ public abstract class ReactiveWorker_V2F<T,U> extends FifoWriter<U> implements R
     private BlockingQueue<T> internalFifo;      // The internal fifo between first task  and second task
     private boolean firstHasFinished  = false;  // true when the first task has finished
 
-    /** Starts each task in its own thread */
+    /** Starts each task in its own thread. Non blocking. */
     public final void launch(){
         internalFifo = new ArrayBlockingQueue<T>(10000);
         Thread t1 = new Thread(this);
@@ -42,7 +42,7 @@ public abstract class ReactiveWorker_V2F<T,U> extends FifoWriter<U> implements R
                 break;
             case 2:
                 secondTask();
-                lastTaskIsFinished();
+                declareLastTaskIsFinished();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + numberTaskToLaunch);

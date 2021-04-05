@@ -9,7 +9,7 @@ import core.structure.FifoWriter;
  * @param <U> : is the type returned by the task into the fifo */
 public abstract class ReactiveWorker_V1F<U> extends FifoWriter<U> implements Runnable {
 
-    /** Starts the single task in its own thread */
+    /** Starts the single task in its own thread. Non blocking. */
     public final void launch(){
         Thread t1 = new Thread(this);
         t1.start();
@@ -18,7 +18,7 @@ public abstract class ReactiveWorker_V1F<U> extends FifoWriter<U> implements Run
     @Override
     public final void run() {
         task();
-        lastTaskIsFinished();
+        declareLastTaskIsFinished();
     }
 
     /** Task to execute.<br>

@@ -1,5 +1,7 @@
 package core;
 
+import core.structure.VariableSender;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -10,7 +12,7 @@ import java.util.concurrent.BlockingQueue;
  * @param <U> : is the type of data exchanged between second task and third task.
  * @param <V> : is the type of data exchanged between third task and fourth task.
  * @param <W> : is the type returned by the last task through launch() method. */
-public abstract class ReactiveWorker_V4V<T,U,V,W> implements Runnable {
+public abstract class ReactiveWorker_V4V<T,U,V,W> extends VariableSender<W> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
     private BlockingQueue<T> internalFifo1;     // The internal fifo between first task  and second task
@@ -19,10 +21,9 @@ public abstract class ReactiveWorker_V4V<T,U,V,W> implements Runnable {
     private boolean firstHasFinished  = false;  // true when the first task has finished
     private boolean secondHasFinished = false;  // true when the second task has finished
     private boolean thirdHasFinished  = false;  // true when the third task has finished
-    private boolean fourthHasFinished = false;  // true when the fourth task has finished;
-    private W computedResult = null;
 
-    /** Starts each task in its own thread */
+    /** Starts each task in its own thread.
+     * @return The answer of last task when it's finished */
     public final W launch(){
         internalFifo1 = new ArrayBlockingQueue<T>(10000);
         internalFifo2 = new ArrayBlockingQueue<U>(10000);
@@ -36,14 +37,7 @@ public abstract class ReactiveWorker_V4V<T,U,V,W> implements Runnable {
         t3.start();
         Thread t4 = new Thread(this);
         t4.start();
-        while( fourthHasFinished == false){
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        return computedResult;
+        return answerWhenAvailable();
     }
 
     /** Call the task dedicated to this thread and indicates when its complete */
@@ -70,7 +64,7 @@ public abstract class ReactiveWorker_V4V<T,U,V,W> implements Runnable {
                 break;
             case 4:
                 fourthTask();
-                fourthHasFinished = true;
+                declareLastTaskIsFinished();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + numberTaskToLaunch);
@@ -135,10 +129,5 @@ public abstract class ReactiveWorker_V4V<T,U,V,W> implements Runnable {
             if (null != element) return element;
             if (secondHasFinished) return null;
         }
-    }
-
-    /** return the given result to the caller of this object. This method has to be called by the last task */
-    protected final void answer(W result){
-        computedResult = result;
     }
 }

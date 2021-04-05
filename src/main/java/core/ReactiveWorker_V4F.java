@@ -23,7 +23,7 @@ public abstract class ReactiveWorker_V4F<T,U,V,W> extends FifoWriter<W> implemen
     private boolean secondHasFinished = false;  // true when the second task has finished
     private boolean thirdHasFinished  = false;  // true when the third task has finished
 
-    /** Starts each task in its own thread */
+    /** Starts each task in its own thread. Non blocking. */
     public final void launch(){
         internalFifo1 = new ArrayBlockingQueue<T>(10000);
         internalFifo2 = new ArrayBlockingQueue<U>(10000);
@@ -63,7 +63,7 @@ public abstract class ReactiveWorker_V4F<T,U,V,W> extends FifoWriter<W> implemen
                 break;
             case 4:
                 fourthTask();
-                lastTaskIsFinished();
+                declareLastTaskIsFinished();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + numberTaskToLaunch);

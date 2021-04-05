@@ -1,5 +1,7 @@
 package core;
 
+import core.structure.VariableSender;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -9,17 +11,16 @@ import java.util.concurrent.BlockingQueue;
  * @param <T> : is the type of data exchanged between first task and second task.
  * @param <U> : is the type of data exchanged between second task and third task.
  * @param <V> : is the type returned by the last task through launch() method. */
-public abstract class ReactiveWorker_V3V<T,U,V> implements Runnable {
+public abstract class ReactiveWorker_V3V<T,U,V> extends VariableSender<V> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
     private BlockingQueue<T> internalFifo1;     // The internal fifo between first task  and second task
     private BlockingQueue<U> internalFifo2;     // The output fifo into the second task write, and caller read
     private boolean firstHasFinished  = false;  // true when the first task has finished
     private boolean secondHasFinished = false;  // true when the second task has finished
-    private boolean thirdHasFinished  = false;  // true when the second task has finished
-    private V computedResult = null;
 
-    /** Starts each task in its own thread, and return the result of third task. This launcher() method is  */
+    /** Starts each task in its own thread.
+     * @return The answer of last task when it's finished */
     public final V launch(){
         internalFifo1 = new ArrayBlockingQueue<T>(10000);
         internalFifo2 = new ArrayBlockingQueue<U>(10000);
@@ -30,14 +31,7 @@ public abstract class ReactiveWorker_V3V<T,U,V> implements Runnable {
         t2.start();
         Thread t3 = new Thread(this);
         t3.start();
-        while( thirdHasFinished == false){
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        return computedResult;
+        return answerWhenAvailable();
     }
 
     /** Call the task dedicated to this thread and indicates when its complete */
@@ -60,7 +54,7 @@ public abstract class ReactiveWorker_V3V<T,U,V> implements Runnable {
                 break;
             case 3:
                 thirdTask();
-                thirdHasFinished = true;
+                declareLastTaskIsFinished();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + numberTaskToLaunch);
@@ -105,9 +99,4 @@ public abstract class ReactiveWorker_V3V<T,U,V> implements Runnable {
             if (secondHasFinished) return null;
         }
     }
-
-    /** return the given result to the caller of this object. This method has to be called by the last task */
-   protected final void answer(V result){
-        computedResult = result;
-   }
 }

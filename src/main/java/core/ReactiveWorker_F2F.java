@@ -5,12 +5,13 @@ import core.structure.FifoReaderWriter;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-/** Worker with a two task.
+/** Worker with two tasks.
  * The results of the last task are returned through a fifo.
  * This fifo can be read by launcher (caller) using next() method.
- * The initial data consumed by single task are sended by launcher using feed() method, and read first task using
+ * The initial data consumed by the first task are sent by launcher using feed() method, and read by the first task using
  * fromLauncher() method.
- * @param <T> : is the type of data exchanged between first task and second task.
+ * @param <T> : is the type sent by launcher to the first task.
+ * @param <U> : is the type of data exchanged between first task and second task.
  * @param <U> : is the type returned by the task into the fifo */
 public abstract class ReactiveWorker_F2F<T,U,V> extends FifoReaderWriter<T,V> implements Runnable {
 
@@ -18,7 +19,7 @@ public abstract class ReactiveWorker_F2F<T,U,V> extends FifoReaderWriter<T,V> im
     private BlockingQueue<U> internalFifo;      // The internal fifo between first task  and second task
     private boolean firstHasFinished  = false;  // true when the first task has finished
 
-    /** Starts each task in its own thread */
+    /** Starts each task in its own thread. Non blocking. */
     public final void launch(){
         internalFifo = new ArrayBlockingQueue<U>(10000);
 

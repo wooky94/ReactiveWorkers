@@ -4,9 +4,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /** abtract class that contains tools to be fed by launcher.<br>
- * An inputFifo
- * A feed() method to allow launcher to send input data to the task.
- * A fromLauncher() method to allow task to get input data from the inputFifo.
+ * An inputFifo<br>
+ * A feed() method to allow launcher to send input data to the task.<br>
+ * A fromLauncher() method to allow task to get input data from the inputFifo.<br>
  * @param <U> : is the type of object that are put into the input fifo
  */
 public abstract class FiFoReader<U> {

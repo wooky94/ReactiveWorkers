@@ -34,7 +34,7 @@ public abstract class FifoWriter<U> {
     }
 
     /** declare that last task is finished. This means that if the fifo is empty, then no more data should be expected. */
-    protected void lastTaskIsFinished() {
+    protected void declareLastTaskIsFinished() {
         lastTaskIsFinished = true;
     }
 

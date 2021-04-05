@@ -1,5 +1,8 @@
 package core;
 
+import core.structure.VariableSender;
+
+import javax.xml.bind.util.ValidationEventCollector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -8,15 +11,14 @@ import java.util.concurrent.BlockingQueue;
  * The initial data consumed by first task has to be given by constructor call.
  * @param <T> : is the type of data exchanged between first task and second task.
  * @param <U> : is the type returned by the last task through launch() method. */
-public abstract class ReactiveWorker_V2V<T,U> implements Runnable {
+public abstract class ReactiveWorker_V2V<T,U> extends VariableSender<U> implements Runnable {
 
     private int taskToLaunch = 1;               // Counter to launch each task only once.
     private BlockingQueue<T> internalFifo;      // The internal fifo between first task  and second task
     private boolean firstHasFinished  = false;  // true when the first task has finished
-    private boolean secondHasFinished = false;  // true when the second task has finished
-    private U computedResult = null;
 
-    /** Starts each task in its own thread */
+    /** Starts each task in its own thread.
+     * @return The answer of last task when it's finished */
     public final U launch(){
         internalFifo = new ArrayBlockingQueue<T>(10000);
 
@@ -24,14 +26,7 @@ public abstract class ReactiveWorker_V2V<T,U> implements Runnable {
         t1.start();
         Thread t2 = new Thread(this);
         t2.start();
-        while( secondHasFinished == false){
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        return computedResult;
+        return answerWhenAvailable();
     }
 
     /** Call the task dedicated to this thread and indicates when its complete */
@@ -50,7 +45,7 @@ public abstract class ReactiveWorker_V2V<T,U> implements Runnable {
                 break;
             case 2:
                 secondTask();
-                secondHasFinished = true;
+                declareLastTaskIsFinished();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + numberTaskToLaunch);
@@ -79,10 +74,4 @@ public abstract class ReactiveWorker_V2V<T,U> implements Runnable {
             if (firstHasFinished) return null;
         }
     }
-
-    /** return the given result to the caller of this object. This method has to be called by the last task */
-    protected final void answer(U result){
-        computedResult = result;
-    }
-
 }

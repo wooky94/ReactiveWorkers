@@ -23,6 +23,21 @@ public abstract class FifoReaderWriter<U,V> extends FiFoReader<U> {
         outPutFifo = new ArrayBlockingQueue<V>(10000);
     }
 
+
+
+    /** declare that last task is finished. This means that if the fifo is empty, then no more data should be expected. */
+    protected void declareLastTaskIsFinished() {
+        lastTaskIsFinished = true;
+    }
+
+
+
+    /*============================================================================================*/
+    /*                                           INPUT                                            */
+    /*============================================================================================*/
+    /*============================================================================================*/
+    /*                                           OUTPUT                                           */
+    /*============================================================================================*/
     /** send the specified element through main fifo (to the launcher).
      * Some exceptions can be throwed, if element is null, if element contains some attributs that prevent it
      * to be putted into the queue, etc...<br>
@@ -35,13 +50,6 @@ public abstract class FifoReaderWriter<U,V> extends FiFoReader<U> {
     protected void answer(V element) throws InterruptedException,ClassCastException,NullPointerException,IllegalArgumentException {
         outPutFifo.put(element);
     }
-
-    /** declare that last task is finished. This means that if the fifo is empty, then no more data should be expected. */
-    protected void declareLastTaskIsFinished() {
-        lastTaskIsFinished = true;
-    }
-
-
     /** This method has to be used by the launcher.
      * @return The next element from the fifo filled by the task */
     public V next(){

@@ -66,7 +66,7 @@ public abstract class FiFoReaderVariableSender<U,V> {
     }
 
     /** declare that last task is finished. This means that if the fifo is empty, then no more data should be expected. */
-    final protected void declaresLastTaskIsFinished() {
+    final protected void declareLastTaskIsFinished() {
         lastTaskIsFinished = true;
     }
 
